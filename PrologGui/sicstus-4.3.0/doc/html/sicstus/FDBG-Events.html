@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html lang="en">
+<head>
+<title>FDBG Events - SICStus Prolog</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="SICStus Prolog">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="FDBG-Concepts.html#FDBG-Concepts" title="FDBG Concepts">
+<link rel="next" href="FDBG-Labeling-Levels.html#FDBG-Labeling-Levels" title="FDBG Labeling Levels">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+<link href="texinfo.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<h5 class="subsubsection">10.38.2.1 Events</h5>
+
+<p><a name="index-FDBG-event-3867"></a><a name="index-event_002c-FDBG-3868"></a>
+An FDBG event can (currently) belong to one of the two following major
+classes:
+
+     <dl>
+<dt><dfn>constraint event</dfn><dd><a name="index-constraint-event-3869"></a><a name="index-event_002c-constraint-3870"></a>A global constraint is woken.
+
+     <br><dt><dfn>labeling event</dfn><dd><a name="index-labeling-event-3871"></a><a name="index-event_002c-labeling-3872"></a>Three events belong to this class, namely:
+
+          <ul>
+<li>the labeling of an FD variable is started
+<li>an FD variable gets constrained
+<li>the labeling of an FD variable fails, i.e. all elements of its
+domain have been tried and caused failure
+</ul>
+     </dl>
+
+   <p>These events are intercepted by the FDBG core.  When any of them occurs,
+the appropriate visualizer (see <a href="FDBG-Visualizers.html#FDBG-Visualizers">FDBG Visualizers</a>) gets called with a
+representation of the event (a Prolog term) as extra
+arguments.
+
+   <p><a name="index-indexicals-3873"></a>Note that it is <em>not possible</em> to debug indexicals with
+FDBG. What's more, any domain narrowings done by indexicals happen
+unnoticed, making FDBG output harder to follow.  On the other hand,
+arithmetical constraints (like <code>X #&gt; 0</code>) are translated to global
+constraints instead of indexicals after consulting
+<code>library(fdbg)</code>, and therefore don't lead to any misunderstandings. 
+For this latter reason it is advisable to load
+<code>library(fdbg)</code> <em>before</em> any user programs.
+
+<div class="logo">
+<a href="http://www.sics.se/sicstus/">
+<table><tr><td>&nbsp;</td></tr></table>
+</a>
+</div>
+<div class="node">
+<ul class="node">
+<li><a href="index.html#Top">User's Manual</a>
+<hr>
+<li><a href="index.html#TOC">Table of Contents</a>
+<li><a rel="next" accesskey="n" href="FDBG-Labeling-Levels.html#FDBG-Labeling-Levels">Next</a>
+<li><a rel="up" accesskey="u" href="FDBG-Concepts.html#FDBG-Concepts">Up</a>
+</ul>
+</div>
+<hr>
+<a HREF="mailto:sicstus-support@sics.se?subject=Documentation%20feedback%20on%20html/sicstus/FDBG-Events.html&amp;body=Feedback%20on%20documentation%20node%20html/sicstus/FDBG-Events.html%20in%20User's%20Manual.">Send feedback on this subject.</a>
+   </body></html>
+

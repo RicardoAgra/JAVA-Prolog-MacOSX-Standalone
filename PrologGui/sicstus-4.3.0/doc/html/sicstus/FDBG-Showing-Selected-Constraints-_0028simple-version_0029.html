@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html lang="en">
+<head>
+<title>FDBG Showing Selected Constraints (simple version) - SICStus Prolog</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="SICStus Prolog">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="FDBG-Advanced-Usage.html#FDBG-Advanced-Usage" title="FDBG Advanced Usage">
+<link rel="prev" href="FDBG-Writing-Legend-Printers.html#FDBG-Writing-Legend-Printers" title="FDBG Writing Legend Printers">
+<link rel="next" href="FDBG-Showing-Selected-Constraints-_0028advanced-version_0029.html#FDBG-Showing-Selected-Constraints-_0028advanced-version_0029" title="FDBG Showing Selected Constraints (advanced version)">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+<link href="texinfo.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<h5 class="subsubsection">10.38.4.4 Showing Selected Constraints (simple version)</h5>
+
+<p>Sometimes the programmer is not interested in every global constraint,
+only some selected ones.  Such a filter can be easily implemented with a
+user-defined visualizer.  Suppose that you are interested in the constraints
+<code>all_different/1</code> and <code>all_distinct/1</code> only:
+
+<pre class="example">     %% spec_filter(+Constraint, +Actions):  Call fdbg_show for all constraints
+     %%   for which intresting_event(Constraint) succeeds.
+     %%
+     %%   Use this filter by giving the constraint_hook(spec_filter) option to
+     %%   fdbg_on.
+     spec_filter(Constraint, Actions) :-
+             interesting_event(Constraint),
+             fdbg_show(Constraint, Actions).
+     
+     interesting_event(all_different(_)).
+     interesting_event(all_distinct(_)).
+</pre>
+   <p>Here is a session using the visualizer.  Note that the initialization
+part (<code>domain/3</code> events), are filtered out, leaving only the
+<code>all_different/1</code> constraints:
+
+<pre class="example">     | ?- <kbd>[library('clpfd/examples/suudoku')].</kbd>
+     [...]
+     | ?- <kbd>fdbg_on(constraint_hook(spec_filter)).</kbd>
+     % The clp(fd) debugger is switched on
+     % advice
+     | ?- <kbd>suudoku([], 1, P).</kbd>
+     all_different([1,&lt;fdvar_1&gt;,&lt;fdvar_2&gt;,8,&lt;fdvar_3&gt;,
+                    4,&lt;fdvar_4&gt;,&lt;fdvar_5&gt;,&lt;fdvar_6&gt;])
+         fdvar_1 = 1..9 -&gt; (2..3)\/(5..7)\/{9}
+         fdvar_2 = 1..9 -&gt; (2..3)\/(5..7)\/{9}
+         fdvar_3 = 1..9 -&gt; (2..3)\/(5..7)\/{9}
+         fdvar_4 = 1..9 -&gt; (2..3)\/(5..7)\/{9}
+         fdvar_5 = 1..9 -&gt; (2..3)\/(5..7)\/{9}
+         fdvar_6 = 1..9 -&gt; (2..3)\/(5..7)\/{9}
+     
+     [...]
+     
+     all_different([7,6,2,5,8,4,1,3,9])
+         Constraint exited.
+     
+     P = [...] <kbd>;</kbd>
+     no
+     % advice
+     | ?- <kbd>fdbg_off.</kbd>
+     % The clp(fd) debugger is switched off
+</pre>
+   <p>Note that the failure of <code>spec_filter/2</code> doesn't cause any unwanted
+output.
+
+<div class="logo">
+<a href="http://www.sics.se/sicstus/">
+<table><tr><td>&nbsp;</td></tr></table>
+</a>
+</div>
+<div class="node">
+<ul class="node">
+<li><a href="index.html#Top">User's Manual</a>
+<hr>
+<li><a href="index.html#TOC">Table of Contents</a>
+<li><a rel="next" accesskey="n" href="FDBG-Showing-Selected-Constraints-_0028advanced-version_0029.html#FDBG-Showing-Selected-Constraints-_0028advanced-version_0029">Next</a>
+<li><a rel="previous" accesskey="p" href="FDBG-Writing-Legend-Printers.html#FDBG-Writing-Legend-Printers">Previous</a>
+<li><a rel="up" accesskey="u" href="FDBG-Advanced-Usage.html#FDBG-Advanced-Usage">Up</a>
+</ul>
+</div>
+<hr>
+<a HREF="mailto:sicstus-support@sics.se?subject=Documentation%20feedback%20on%20html/sicstus/FDBG-Showing-Selected-Constraints-_0028simple-version_0029.html&amp;body=Feedback%20on%20documentation%20node%20html/sicstus/FDBG-Showing-Selected-Constraints-_0028simple-version_0029.html%20in%20User's%20Manual.">Send feedback on this subject.</a>
+   </body></html>
+

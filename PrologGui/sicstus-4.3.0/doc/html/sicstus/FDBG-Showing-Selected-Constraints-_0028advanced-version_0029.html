@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html lang="en">
+<head>
+<title>FDBG Showing Selected Constraints (advanced version) - SICStus Prolog</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="SICStus Prolog">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="FDBG-Advanced-Usage.html#FDBG-Advanced-Usage" title="FDBG Advanced Usage">
+<link rel="prev" href="FDBG-Showing-Selected-Constraints-_0028simple-version_0029.html#FDBG-Showing-Selected-Constraints-_0028simple-version_0029" title="FDBG Showing Selected Constraints (simple version)">
+<link rel="next" href="FDBG-Debugging-Global-Constraints.html#FDBG-Debugging-Global-Constraints" title="FDBG Debugging Global Constraints">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+<link href="texinfo.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<h5 class="subsubsection">10.38.4.5 Showing Selected Constraints (advanced version)</h5>
+
+<p>Suppose that you want to give the constraints that you are interested in
+as an argument to the visualizer, instead of defining them in a
+table.  The following visualizer implements this.
+
+<pre class="example">     :- use_module(library(lists), [append/3]).
+     
+     %% filter_events(+CtrSpecs, +Constraint, +Actions):  This predicate will
+     %%   only show constraint events if they match an element in the list CtrSpecs,
+     %%   or if CtrSpecs is wrapped in -/1, all the non-matching events will
+     %%   be shown.
+     %%   CtrSpecs can contain the following types of elements:
+     %%     ctr_name             - matches all constraints of the given name
+     %%     ctr_name/arity       - matches constraints with the given name and arity
+     %%     ctr_name(...args...) - matches constraints unifyable with the given term
+     %%
+     %%   For the selected events fdbg_show(Constraint, Actions) is called.
+     %%   This visualizer can be specified when turning fdbg on, e.g.:
+     %%     fdbg_on([constraint_hook(filter_events([count/4]))]), or
+     %%     fdbg_on([constraint_hook(filter_events(-[in_set]))]).
+     filter_events(CtrSpecs, Constraint, Actions) :-
+             filter_events(CtrSpecs, fdbg_show, Constraint, Actions).
+     
+     %% filter_events(+CtrSpecs, +Visualizer, +Constraint, +Actions):  Same as
+     %%   the above predicate, but the extra argument Visualizer specifies the
+     %%   predicate to be called for the selected events (in the same form as
+     %%   in the constraint_hook option, i.e. without the last two arguments). E.g.
+     %%     fdbg_on([constraint_hook(filter_events([count/4],my_show))]).
+     filter_events(-CtrSpecs, Visualizer, Constraint, Actions) :- !,
+             \+ show_constraint(CtrSpecs, Constraint),
+             add_args(Visualizer, [Constraint, Actions], Goal),
+             call(Goal).
+     filter_events(CtrSpecs, Visualizer, Constraint, Actions) :-
+             show_constraint(CtrSpecs, Constraint),
+             add_args(Visualizer, [Constraint, Actions], Goal),
+             call(Goal).
+     
+     show_constraint([C|_], Constraint) :-
+             matches(C, Constraint), !.
+     show_constraint([_|Cs], Constraint) :-
+             show_constraint(Cs, Constraint).
+     
+     matches(Name/Arity, Constraint) :- !,
+             functor(Constraint, Name, Arity).
+     matches(Name, Constraint) :-
+             atom(Name), !,
+             functor(Constraint, Name, _).
+     matches(C, Constraint) :-
+             C = Constraint.
+     
+     add_args(Goal0, NewArgs, Goal) :-
+             Goal0 =.. [F|Args0],
+             append(Args0, NewArgs, Args),
+             Goal =.. [F|Args].
+</pre>
+   <p>Here is a session using the visualizer, filtering out everything
+but <code>all_different/1</code> constraints:
+
+<pre class="example">     | ?- <kbd>[library('clpfd/examples/suudoku')].</kbd>
+     [...]
+     | ?- <kbd>fdbg_on(constraint_hook(filter_events([all_different/1]))).</kbd>
+     % The clp(fd) debugger is switched on
+     % advice
+     | ?- <kbd>suudoku([], 1, P).</kbd>
+     all_different([1,&lt;fdvar_1&gt;,&lt;fdvar_2&gt;,8,&lt;fdvar_3&gt;,
+                    4,&lt;fdvar_4&gt;,&lt;fdvar_5&gt;,&lt;fdvar_6&gt;])
+         fdvar_1 = 1..9 -&gt; (2..3)\/(5..7)\/{9}
+         fdvar_2 = 1..9 -&gt; (2..3)\/(5..7)\/{9}
+         fdvar_3 = 1..9 -&gt; (2..3)\/(5..7)\/{9}
+         fdvar_4 = 1..9 -&gt; (2..3)\/(5..7)\/{9}
+         fdvar_5 = 1..9 -&gt; (2..3)\/(5..7)\/{9}
+         fdvar_6 = 1..9 -&gt; (2..3)\/(5..7)\/{9}
+     
+     [...]
+     
+     all_different([7,6,2,5,8,4,1,3,9])
+         Constraint exited.
+     
+     P = [...] <kbd>;</kbd>
+     no
+     % advice
+     | ?- <kbd>fdbg_off.</kbd>
+     % The clp(fd) debugger is switched off
+</pre>
+   <p>In the next session, all constraints named <code>all_different</code> are
+ignored, irrespective of arity.  Also, we explicitly specified the
+visualizer to be called for the events that are kept (here, we have
+written the default, <code>fdbg_show</code>, so the actual behavior is not
+changed).
+
+<pre class="example">     | ?- <kbd>[library('clpfd/examples/suudoku')].</kbd>
+     [...]
+     | ?- <kbd>fdbg_on(constraint_hook(filter_events(-[all_different],fdbg_show))).</kbd>
+     % The clp(fd) debugger is switched on
+     % advice
+     | ?- <kbd>suudoku([], 1, P).</kbd>
+     domain([1,&lt;fdvar_1&gt;,&lt;fdvar_2&gt;,8,&lt;fdvar_3&gt;,
+             4,&lt;fdvar_4&gt;,&lt;fdvar_5&gt;,&lt;fdvar_6&gt;],1,9)
+         fdvar_1 = inf..sup -&gt; 1..9
+         fdvar_2 = inf..sup -&gt; 1..9
+         fdvar_3 = inf..sup -&gt; 1..9
+         fdvar_4 = inf..sup -&gt; 1..9
+         fdvar_5 = inf..sup -&gt; 1..9
+         fdvar_6 = inf..sup -&gt; 1..9
+         Constraint exited.
+         Constraint exited.
+     
+     [...]
+     
+     domain([2,&lt;fdvar_46&gt;,5,&lt;fdvar_47&gt;,&lt;fdvar_48&gt;,
+            &lt;fdvar_49&gt;,&lt;fdvar_50&gt;,&lt;fdvar_51&gt;,9],1,9)
+         fdvar_46 = inf..sup -&gt; 1..9
+         fdvar_47 = inf..sup -&gt; 1..9
+         fdvar_48 = inf..sup -&gt; 1..9
+         fdvar_49 = inf..sup -&gt; 1..9
+         fdvar_50 = inf..sup -&gt; 1..9
+         fdvar_51 = inf..sup -&gt; 1..9
+         Constraint exited.
+     
+     P = [...] <kbd>;</kbd>
+     no
+     % advice
+     | ?- <kbd>fdbg_off.</kbd>
+     % The clp(fd) debugger is switched off
+</pre>
+   <p>In the last session, we specify a list of constraints to ignore, using a
+pattern to select the appropriate constraints.  Since all constraints in
+the example match one of the items in the given list, no events are
+printed.
+
+<pre class="example">     | ?- <kbd>[library('clpfd/examples/suudoku')].</kbd>
+     [...]
+     | ?- <kbd>fdbg_on(constraint_hook(filter_events(-[domain(_,1,9),all_different(_)]))).</kbd>
+     % The clp(fd) debugger is switched on
+     % advice
+     | ?- <kbd>suudoku([], 1, P).</kbd>
+     P = [...] <kbd>;</kbd>
+     no
+     % advice
+     | ?- <kbd>fdbg_off.</kbd>
+     % The clp(fd) debugger is switched off
+</pre>
+<div class="logo">
+<a href="http://www.sics.se/sicstus/">
+<table><tr><td>&nbsp;</td></tr></table>
+</a>
+</div>
+<div class="node">
+<ul class="node">
+<li><a href="index.html#Top">User's Manual</a>
+<hr>
+<li><a href="index.html#TOC">Table of Contents</a>
+<li><a rel="next" accesskey="n" href="FDBG-Debugging-Global-Constraints.html#FDBG-Debugging-Global-Constraints">Next</a>
+<li><a rel="previous" accesskey="p" href="FDBG-Showing-Selected-Constraints-_0028simple-version_0029.html#FDBG-Showing-Selected-Constraints-_0028simple-version_0029">Previous</a>
+<li><a rel="up" accesskey="u" href="FDBG-Advanced-Usage.html#FDBG-Advanced-Usage">Up</a>
+</ul>
+</div>
+<hr>
+<a HREF="mailto:sicstus-support@sics.se?subject=Documentation%20feedback%20on%20html/sicstus/FDBG-Showing-Selected-Constraints-_0028advanced-version_0029.html&amp;body=Feedback%20on%20documentation%20node%20html/sicstus/FDBG-Showing-Selected-Constraints-_0028advanced-version_0029.html%20in%20User's%20Manual.">Send feedback on this subject.</a>
+   </body></html>
+

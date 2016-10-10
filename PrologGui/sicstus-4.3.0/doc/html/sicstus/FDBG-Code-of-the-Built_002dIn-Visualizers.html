@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html lang="en">
+<head>
+<title>FDBG Code of the Built-In Visualizers - SICStus Prolog</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="SICStus Prolog">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="FDBG-Advanced-Usage.html#FDBG-Advanced-Usage" title="FDBG Advanced Usage">
+<link rel="prev" href="FDBG-Debugging-Global-Constraints.html#FDBG-Debugging-Global-Constraints" title="FDBG Debugging Global Constraints">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+<link href="texinfo.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<h5 class="subsubsection">10.38.4.7 Code of the Built-In Visualizers</h5>
+
+<p>Now that you know everything about writing visualizers, it might be worth
+having a look at the code of the built-in visualizers,
+<code>fdbg_show/2</code> and <code>fdbg_label_show/3</code>.
+
+<pre class="example">     fdbg_show(Constraint, Actions) :-
+             fdbg_annotate(Constraint, Actions, AnnotC, CVars),
+             print(fdbg_output, AnnotC),
+             nl(fdbg_output),
+             fdbg_legend(CVars, Actions),
+             nl(fdbg_output).
+     
+     fdbg_label_show(start, I, Var) :-
+             fdbg_annotate(Var, AVar, _),
+             (   AVar = fdvar(Name, _, Set)
+             -&gt;  fdset_to_range(Set, Range),
+                 format(fdbg_output,
+                        'Labeling [~p, &lt;~p&gt;]: starting in range ~p.~n',
+                        [I,Name,Range])
+             ;   format(fdbg_output,
+                        'Labeling [~p, &lt;&gt;]: starting.~n',
+                        [I])
+             ).
+     fdbg_label_show(fail, I, Var) :-
+             (   var(Var)
+             -&gt;  lookup_or_set_name(Var, Name),
+                 format(fdbg_output,
+                        'Labeling [~p, &lt;~p&gt;]: failed.~n~n',
+                        [I,Name])
+             ;   format(fdbg_output,
+                        'Labeling [~p, &lt;&gt;]: failed.~n~n',
+                        [I])
+             ).
+     fdbg_label_show(step(Step), I, Var) :-
+             (   var(Var)
+             -&gt;  lookup_or_set_name(Var, Name),
+                 format(fdbg_output,
+                        'Labeling [~p, &lt;~p&gt;]: ~p~n~n',
+                        [I,Name,Step])
+             ;   format(fdbg_output,
+                        'Labeling [~p, &lt;&gt;]: ~p~n~n',
+                        [I,Step])
+             ).
+     
+     lookup_or_set_name(Term, Name) :-
+             fdbg_get_name(Term, Name), !.
+     lookup_or_set_name(Term, Name) :-
+             fdbg_assign_name(Term, Name).
+</pre>
+   <p>As you can see, they are quite simple, thanks to the extensive set of
+support predicates also available to the user.
+
+<div class="logo">
+<a href="http://www.sics.se/sicstus/">
+<table><tr><td>&nbsp;</td></tr></table>
+</a>
+</div>
+<div class="node">
+<ul class="node">
+<li><a href="index.html#Top">User's Manual</a>
+<hr>
+<li><a href="index.html#TOC">Table of Contents</a>
+<li><a rel="previous" accesskey="p" href="FDBG-Debugging-Global-Constraints.html#FDBG-Debugging-Global-Constraints">Previous</a>
+<li><a rel="up" accesskey="u" href="FDBG-Advanced-Usage.html#FDBG-Advanced-Usage">Up</a>
+</ul>
+</div>
+<hr>
+<a HREF="mailto:sicstus-support@sics.se?subject=Documentation%20feedback%20on%20html/sicstus/FDBG-Code-of-the-Built_002dIn-Visualizers.html&amp;body=Feedback%20on%20documentation%20node%20html/sicstus/FDBG-Code-of-the-Built_002dIn-Visualizers.html%20in%20User's%20Manual.">Send feedback on this subject.</a>
+   </body></html>
+
